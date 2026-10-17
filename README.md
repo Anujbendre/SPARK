@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 # ⚡ SPARK
 ### Find your place in open source.
 
@@ -283,4 +283,3 @@ issues/PRs → contribution recommendation → repository Q&A.
 
 MIT
 
->>>>>>> origin/Hemanshu
