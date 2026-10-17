@@ -11,6 +11,9 @@ interface GitDiagramViewerProps {
   onRegenerate?: () => void;
 }
 
+const MIN_ZOOM = 0.15;
+const MAX_ZOOM = 2.5;
+
 export default function GitDiagramViewer({
   spec,
   repoName,
@@ -18,6 +21,7 @@ export default function GitDiagramViewer({
   onSelectModule,
   onRegenerate,
 }: GitDiagramViewerProps) {
+  const viewportRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [svgHtml, setSvgHtml] = useState<string>("");
   const [renderError, setRenderError] = useState<string | null>(null);
@@ -25,10 +29,11 @@ export default function GitDiagramViewer({
   const [viewMode, setViewMode] = useState<"visual" | "mermaid">("visual");
 
   // Pan and Zoom
-  const [zoom, setZoom] = useState<number>(1);
+  const [zoom, setZoom] = useState<number>(0.85);
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const touchStartRef = useRef<{ x: number; y: number; dist: number }>({ x: 0, y: 0, dist: 0 });
   const [copied, setCopied] = useState<boolean>(false);
   const [copiedSvg, setCopiedSvg] = useState<boolean>(false);
 
@@ -58,6 +63,66 @@ export default function GitDiagramViewer({
 `;
     }
     return clean;
+  }, []);
+
+  // Fit the graph to the fixed viewport container
+  const fitView = useCallback(() => {
+    if (!viewportRef.current || !containerRef.current) return;
+    const svgEl = containerRef.current.querySelector("svg");
+    if (!svgEl) return;
+
+    const vRect = viewportRef.current.getBoundingClientRect();
+    const vWidth = vRect.width || 800;
+    const vHeight = vRect.height || 600;
+
+    // Extract diagram dimensions
+    let dWidth = 0;
+    let dHeight = 0;
+
+    const viewBox = svgEl.getAttribute("viewBox");
+    if (viewBox) {
+      const parts = viewBox.trim().split(/[\s,]+/).map(Number);
+      if (parts.length === 4 && parts[2] > 0 && parts[3] > 0) {
+        dWidth = parts[2];
+        dHeight = parts[3];
+      }
+    }
+
+    if (!dWidth || !dHeight) {
+      try {
+        const bbox = svgEl.getBBox();
+        if (bbox.width > 0 && bbox.height > 0) {
+          dWidth = bbox.width;
+          dHeight = bbox.height;
+        }
+      } catch {
+        // Fallback if getBBox is not available
+      }
+    }
+
+    if (!dWidth || !dHeight) {
+      const rect = svgEl.getBoundingClientRect();
+      dWidth = rect.width || 1000;
+      dHeight = rect.height || 700;
+    }
+
+    // Add 8% comfortable breathing margin
+    const padX = Math.max(32, vWidth * 0.08);
+    const padY = Math.max(32, vHeight * 0.08);
+
+    const availW = Math.max(100, vWidth - padX * 2);
+    const availH = Math.max(100, vHeight - padY * 2);
+
+    const sX = availW / dWidth;
+    const sY = availH / dHeight;
+
+    let optimalZoom = Math.min(sX, sY);
+    // Clamp between MIN_ZOOM and a sensible 1.05 max start zoom
+    optimalZoom = Math.max(MIN_ZOOM, Math.min(optimalZoom, 1.05));
+    optimalZoom = +optimalZoom.toFixed(2);
+
+    setZoom(optimalZoom);
+    setPan({ x: 0, y: 0 });
   }, []);
 
   // Render diagram using Mermaid.js
@@ -159,6 +224,16 @@ export default function GitDiagramViewer({
     };
   }, [spec, cleanSpec]);
 
+  // Automatically fit view whenever a new diagram renders
+  useEffect(() => {
+    if (svgHtml && viewMode === "visual") {
+      const timer = setTimeout(() => {
+        fitView();
+      }, 70);
+      return () => clearTimeout(timer);
+    }
+  }, [svgHtml, viewMode, fitView]);
+
   // Handle node clicks inside the rendered SVG
   useEffect(() => {
     if (!containerRef.current || !modules || modules.length === 0 || !onSelectModule) return;
@@ -192,7 +267,7 @@ export default function GitDiagramViewer({
     };
   }, [svgHtml, modules, onSelectModule]);
 
-  // Pan interaction handlers
+  // Pan interaction handlers (Mouse)
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest("button")) return;
     setIsDragging(true);
@@ -209,23 +284,71 @@ export default function GitDiagramViewer({
 
   const handleMouseUp = () => setIsDragging(false);
 
-  // Wheel zoom
+  // Touch handlers (1 finger pan, 2 finger pinch zoom)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if ((e.target as HTMLElement).closest("button")) return;
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      touchStartRef.current = {
+        x: e.touches[0].clientX - pan.x,
+        y: e.touches[0].clientY - pan.y,
+        dist: 0,
+      };
+    } else if (e.touches.length === 2) {
+      setIsDragging(false);
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      touchStartRef.current = { x: pan.x, y: pan.y, dist };
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 1 && isDragging) {
+      setPan({
+        x: e.touches[0].clientX - touchStartRef.current.x,
+        y: e.touches[0].clientY - touchStartRef.current.y,
+      });
+    } else if (e.touches.length === 2 && touchStartRef.current.dist > 0) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      const factor = dist / touchStartRef.current.dist;
+      touchStartRef.current.dist = dist;
+      setZoom((z) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, +(z * factor).toFixed(2))));
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    touchStartRef.current.dist = 0;
+  };
+
+  // Wheel and trackpad zoom
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
+    e.stopPropagation();
+
+    // Trackpad pinch-to-zoom (ctrlKey is true on trackpads)
+    if (e.ctrlKey) {
+      const factor = 1 - e.deltaY * 0.01;
+      setZoom((z) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, +(z * factor).toFixed(2))));
+      return;
+    }
+
+    // Mouse wheel zoom
     const delta = e.deltaY < 0 ? 0.08 : -0.08;
-    setZoom((z) => Math.min(2.5, Math.max(0.3, +(z + delta).toFixed(2))));
+    setZoom((z) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, +(z + delta).toFixed(2))));
   };
 
   // Zoom controls
-  const zoomIn = () => setZoom((z) => Math.min(2.5, +(z + 0.15).toFixed(2)));
-  const zoomOut = () => setZoom((z) => Math.max(0.3, +(z - 0.15).toFixed(2)));
+  const zoomIn = () => setZoom((z) => Math.min(MAX_ZOOM, +(z + 0.15).toFixed(2)));
+  const zoomOut = () => setZoom((z) => Math.max(MIN_ZOOM, +(z - 0.15).toFixed(2)));
   const resetZoom = () => {
     setZoom(1);
     setPan({ x: 0, y: 0 });
-  };
-  const fitView = () => {
-    setZoom(0.85);
-    setPan({ x: 0, y: 15 });
   };
 
   // Copy Mermaid Spec
@@ -252,7 +375,7 @@ export default function GitDiagramViewer({
   };
 
   return (
-    <div className="flex flex-col border-2 border-black bg-surface-container-lowest brutal-shadow-lg overflow-hidden">
+    <div className="flex flex-col border-2 border-black bg-surface-container-lowest brutal-shadow-lg w-full max-w-full overflow-hidden">
       {/* GITDIAGRAM TOP TOOLBAR (EXACT MATCHING UI) */}
       <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-[#fbfbfe] border-b-2 border-black z-20">
         {/* Left: Repository Badge */}
@@ -297,7 +420,7 @@ export default function GitDiagramViewer({
         {/* Right: Zoom & Export Controls */}
         <div className="flex items-center gap-2">
           {viewMode === "visual" && (
-            <div className="inline-flex border-2 border-black bg-white items-center">
+            <div className="hidden md:inline-flex border-2 border-black bg-white items-center">
               <button
                 onClick={zoomOut}
                 className="px-2.5 py-1 font-bold hover:bg-surface-container text-xs border-r border-black"
@@ -317,7 +440,7 @@ export default function GitDiagramViewer({
               </button>
               <button
                 onClick={fitView}
-                className="px-2 py-1 font-label-sm text-[10px] uppercase font-bold hover:bg-surface-container border-l border-black"
+                className="px-2 py-1 font-label-sm text-[10px] uppercase font-bold hover:bg-surface-container border-l border-black bg-primary-container text-black"
                 title="Fit to screen"
               >
                 FIT
@@ -363,26 +486,31 @@ export default function GitDiagramViewer({
         </div>
       </div>
 
-      {/* CANVAS VIEWPORT (SOFT PASTEL PURPLE/LILAC BACKGROUND LIKE GITDIAGRAM) */}
+      {/* FIXED VIEWPORT CANVAS (BOUNDED INDEPENDENT WORKSPACE, NEVER EXPANDS PAGE) */}
       {viewMode === "visual" ? (
         <div
-          className="relative w-full h-[600px] overflow-hidden select-none"
+          ref={viewportRef}
+          className="relative w-full h-[580px] md:h-[620px] max-w-full overflow-hidden select-none"
           style={{
-            backgroundColor: "#ede8f5", // Exact soft lilac/lavender canvas from GitDiagram screenshot
+            backgroundColor: "#ede8f5", // Soft lilac/lavender canvas from GitDiagram
             backgroundImage: "radial-gradient(rgba(147, 51, 234, 0.15) 1.5px, transparent 1.5px)",
             backgroundSize: "28px 28px",
             cursor: isDragging ? "grabbing" : "grab",
+            touchAction: "none",
           }}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
           onWheel={handleWheel}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           {/* Instructions Overlay Hint */}
           <div className="absolute top-3 left-3 z-10 pointer-events-none flex items-center gap-2 bg-white/90 backdrop-blur-sm border border-black/20 px-3 py-1 rounded-full text-[11px] text-slate-700 font-medium shadow-sm">
             <span className="material-symbols-outlined text-[14px] text-primary">touch_app</span>
-            <span>Drag to pan canvas • Scroll to zoom • Click boxes to inspect</span>
+            <span>Drag to pan • Wheel/Trackpad to zoom • Click boxes to inspect</span>
           </div>
 
           {/* Loading indicator */}
@@ -416,18 +544,53 @@ export default function GitDiagramViewer({
             </div>
           )}
 
-          {/* SVG RENDERING CONTAINER WITH PAN & ZOOM TRANSFORM */}
+          {/* SVG RENDERING CONTAINER - ABSOLUTE INSET-0 SO IT NEVER DETERMINES PAGE SIZE */}
           <div
             ref={containerRef}
-            className="gitdiagram-svg w-full h-full flex items-center justify-center origin-center transition-transform duration-75"
+            className="gitdiagram-svg absolute inset-0 flex items-center justify-center pointer-events-auto"
             style={{
               transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
               transformOrigin: "center center",
+              transition: isDragging ? "none" : "transform 0.08s ease-out",
+              willChange: "transform",
             }}
             dangerouslySetInnerHTML={{ __html: svgHtml }}
           />
 
-          {/* Canvas SVG element styled via globals.css */}
+          {/* IN-VIEWPORT FLOATING CONTROLS (Neo-Brutalist HUD: [-] [+] [Fit] [⛶]) */}
+          <div className="absolute bottom-3 right-3 z-20 flex items-center bg-white border-2 border-black p-1 brutal-shadow-sm select-none gap-1">
+            <button
+              onClick={zoomOut}
+              className="w-7 h-7 flex items-center justify-center font-bold text-sm border border-black hover:bg-black hover:text-white transition-colors bg-surface-container"
+              title="Zoom Out (-)"
+            >
+              -
+            </button>
+            <span className="px-2 font-mono text-[11px] font-bold text-center min-w-[44px]">
+              {Math.round(zoom * 100)}%
+            </span>
+            <button
+              onClick={zoomIn}
+              className="w-7 h-7 flex items-center justify-center font-bold text-sm border border-black hover:bg-black hover:text-white transition-colors bg-surface-container"
+              title="Zoom In (+)"
+            >
+              +
+            </button>
+            <button
+              onClick={fitView}
+              className="px-2.5 h-7 flex items-center justify-center font-label-sm text-[10px] uppercase font-bold border border-black bg-primary-container text-black hover:bg-black hover:text-primary-container transition-colors"
+              title="Fit graph to viewport"
+            >
+              FIT
+            </button>
+            <button
+              onClick={resetZoom}
+              className="w-7 h-7 flex items-center justify-center font-bold border border-black bg-white hover:bg-black hover:text-white transition-colors"
+              title="Reset view (100%)"
+            >
+              <span className="material-symbols-outlined text-[16px]">fullscreen_exit</span>
+            </button>
+          </div>
         </div>
       ) : (
         /* MERMAID CODE EDITOR / RAW SPEC VIEW */
@@ -482,7 +645,7 @@ export default function GitDiagramViewer({
         </div>
 
         <div className="flex items-center gap-2 text-on-surface-variant font-medium">
-          <span>INTERACTIVE SVG • PAN & ZOOM ENABLED</span>
+          <span>BOUNDED VIEWPORT • PAN & ZOOM ACTIVE</span>
         </div>
       </div>
     </div>

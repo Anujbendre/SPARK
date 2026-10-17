@@ -665,7 +665,7 @@ export default function HomePage() {
               {activeTab === "arch" && (
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
                   {/* GitDiagram Visual Node Diagram Canvas */}
-                  <div className="lg:col-span-8 flex flex-col gap-space-sm">
+                  <div className="lg:col-span-8 flex flex-col gap-space-sm min-w-0 max-w-full overflow-hidden">
                     {/* Quick Module Filter Chips */}
                     <div className="flex flex-wrap items-center gap-1.5 font-label-sm text-[11px] p-2 bg-surface-container-lowest border-2 border-black brutal-shadow-sm">
                       <span className="text-on-surface-variant font-bold uppercase mr-1">SELECT DOMAIN:</span>
