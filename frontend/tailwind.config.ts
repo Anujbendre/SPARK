@@ -1,0 +1,70 @@
+import type { Config } from "tailwindcss";
+
+const config: Config = {
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./lib/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        "surface": "#f9f9f9",
+        "surface-container": "#eeeeee",
+        "surface-container-low": "#f3f3f4",
+        "surface-container-lowest": "#ffffff",
+        "surface-container-high": "#e8e8e8",
+        "surface-container-highest": "#e2e2e2",
+        "on-surface": "#1a1c1c",
+        "on-surface-variant": "#4c4637",
+        "primary": "#715c00",
+        "primary-container": "#ffe17c",
+        "primary-fixed": "#ffe17c",
+        "secondary-container": "#dde5dc",
+        "secondary-fixed-dim": "#c1c8c0",
+        "tertiary-container": "#d7e6e2",
+        "error": "#ba1a1a",
+        "error-container": "#ffdad6",
+        "on-error-container": "#93000a",
+        "on-tertiary": "#ffffff",
+      },
+      fontFamily: {
+        "headline-xl": ["Space Grotesk", "sans-serif"],
+        "headline-lg": ["Space Grotesk", "sans-serif"],
+        "headline-md": ["Space Grotesk", "sans-serif"],
+        "headline-sm": ["Space Grotesk", "sans-serif"],
+        "body-lg": ["Inter", "sans-serif"],
+        "body-md": ["Inter", "sans-serif"],
+        "body-sm": ["Inter", "sans-serif"],
+        "label-lg": ["JetBrains Mono", "monospace"],
+        "label-md": ["JetBrains Mono", "monospace"],
+        "label-sm": ["JetBrains Mono", "monospace"],
+      },
+      fontSize: {
+        "headline-xl": ["56px", { lineHeight: "64px", letterSpacing: "-0.03em", fontWeight: "700" }],
+        "headline-lg": ["40px", { lineHeight: "48px", letterSpacing: "-0.02em", fontWeight: "700" }],
+        "headline-md": ["28px", { lineHeight: "36px", letterSpacing: "-0.01em", fontWeight: "700" }],
+        "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "700" }],
+        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "500" }],
+        "body-md": ["15px", { lineHeight: "24px" }],
+        "body-sm": ["13px", { lineHeight: "20px" }],
+        "label-lg": ["14px", { lineHeight: "20px", letterSpacing: "0.06em", fontWeight: "700" }],
+        "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.08em", fontWeight: "600" }],
+        "label-sm": ["10px", { lineHeight: "14px", letterSpacing: "0.1em", fontWeight: "700" }],
+      },
+      spacing: {
+        "space-xs": "0.25rem",
+        "space-sm": "0.5rem",
+        "space-md": "1rem",
+        "space-lg": "1.5rem",
+        "space-xl": "2.5rem",
+        "gutter": "1.5rem",
+        "gutter-lg": "2rem",
+        "margin": "2rem",
+      },
+    },
+  },
+  plugins: [],
+};
+
+export default config;
