@@ -27,13 +27,24 @@ class RepositoryAgent:
         if not self._client:
             return None
 
-        # Try gemini-2.5-flash first for high speed and reliability, and gemma_model as fallback/alternative
-        models_to_try = ["gemini-2.5-flash"]
-        if settings.gemma_model and settings.gemma_model not in models_to_try:
-            models_to_try.append(settings.gemma_model)
+        # Build model hierarchy: Gemma 4 as PRIMARY, Gemini as FALLBACK
+        models_to_try: list[str] = []
+
+        # 1. Configured primary Gemma model
+        primary_gemma = settings.gemma_model or "gemma-4-26b-a4b-it"
+        models_to_try.append(primary_gemma)
+
+        # 2. Additional Gemma 4 candidate
+        for gemma_alt in ["gemma-4-26b-a4b-it", "gemma-4-31b-it"]:
+            if gemma_alt not in models_to_try:
+                models_to_try.append(gemma_alt)
+
+        # 3. Gemini fallback (only if Gemma endpoints fail)
+        models_to_try.append("gemini-2.5-flash")
 
         for model_name in models_to_try:
             try:
+                logger.info(f"Invoking reasoning model: {model_name}")
                 response = self._client.models.generate_content(
                     model=model_name,
                     contents=contents,
@@ -44,6 +55,7 @@ class RepositoryAgent:
                     },
                 )
                 if response and response.text:
+                    logger.info(f"Model {model_name} generated response successfully.")
                     return response.text.strip()
             except Exception as err:
                 logger.warning(f"Model {model_name} failed: {err}")
