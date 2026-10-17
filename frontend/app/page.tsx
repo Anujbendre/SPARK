@@ -844,7 +844,7 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
                   {/* Issue List */}
                   <div className="lg:col-span-7 flex flex-col gap-space-sm">
                     {analysis.issues.length === 0 ? (
@@ -901,63 +901,61 @@ export default function HomePage() {
                   </div>
 
                   {/* Issue Specification Inspector */}
-                  <div className="lg:col-span-5 border-2 border-black bg-surface-container-lowest p-space-md brutal-shadow-lg flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between border-b-2 border-black pb-2 mb-space-sm">
-                        <span className="font-label-sm text-label-sm bg-black text-white px-2 py-0.5 uppercase">
-                          ISSUE SPECIFICATION
-                        </span>
-                        <span className="font-label-sm text-label-sm text-primary font-bold">
-                          {selectedIssue ? `ISSUE #${selectedIssue.number}` : "SELECT AN ISSUE"}
-                        </span>
-                      </div>
+                  <div className="lg:col-span-5 border-2 border-black bg-surface-container-lowest p-space-md brutal-shadow-lg flex flex-col gap-space-sm sticky top-24 self-start h-fit">
+                    <div className="flex items-center justify-between border-b-2 border-black pb-2">
+                      <span className="font-label-sm text-label-sm bg-black text-white px-2 py-0.5 uppercase">
+                        ISSUE SPECIFICATION
+                      </span>
+                      <span className="font-label-sm text-label-sm text-primary font-bold">
+                        {selectedIssue ? `ISSUE #${selectedIssue.number}` : "SELECT AN ISSUE"}
+                      </span>
+                    </div>
 
-                      <h3 className="font-headline-md text-headline-sm font-bold uppercase mb-2">
-                        {selectedIssue?.title || "Select an issue from the list"}
-                      </h3>
+                    <h3 className="font-headline-md text-headline-sm font-bold uppercase">
+                      {selectedIssue?.title || "Select an issue from the list"}
+                    </h3>
 
-                      <div className="p-3 border-2 border-black bg-secondary-container mb-space-sm font-label-sm text-label-sm">
-                        <div className="font-bold uppercase text-black mb-1">// GEMMA SUITABILITY RATIONALE:</div>
-                        <div className="text-on-surface-variant">
-                          {selectedIssue?.rationale || "Isolated scope suitable for onboarding contributors."}
-                        </div>
-                      </div>
-
-                      {selectedIssue?.touch_files && selectedIssue.touch_files.length > 0 && (
-                        <div className="flex flex-col gap-space-xs font-label-sm text-label-sm mb-space-sm">
-                          <strong>TARGET CODEBASE FILES:</strong>
-                          <ul className="list-disc list-inside font-mono text-xs bg-surface-container p-2 border border-black space-y-1">
-                            {selectedIssue.touch_files.map((f, i) => (
-                              <li key={i}>{f}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-
-                      <div className="flex flex-col gap-1 font-label-sm text-label-sm">
-                        <span className="font-bold uppercase text-on-surface">AUTOMATED NEXT STEPS:</span>
-                        <div className="space-y-1.5 text-on-surface-variant">
-                          {(selectedIssue?.steps && selectedIssue.steps.length > 0
-                            ? selectedIssue.steps
-                            : [
-                                `Clone repository and checkout a new branch fix/issue-${selectedIssue?.number || "42"}`,
-                                "Locate target source files and verify existing test cases",
-                                "Implement the proposed change and run the unit test harness",
-                                "Submit pull request referencing the issue number",
-                              ]
-                          ).map((step, idx) => (
-                            <div key={idx} className="flex items-start gap-2">
-                              <span className="bg-black text-white px-1.5 text-[10px] shrink-0 font-bold">
-                                {idx + 1}
-                              </span>
-                              <span className="text-xs">{step}</span>
-                            </div>
-                          ))}
-                        </div>
+                    <div className="p-3 border-2 border-black bg-secondary-container font-label-sm text-label-sm">
+                      <div className="font-bold uppercase text-black mb-1">// GEMMA SUITABILITY RATIONALE:</div>
+                      <div className="text-on-surface-variant">
+                        {selectedIssue?.rationale || "Isolated scope suitable for onboarding contributors."}
                       </div>
                     </div>
 
-                    <div className="mt-space-md pt-space-sm border-t-2 border-black flex gap-2">
+                    {selectedIssue?.touch_files && selectedIssue.touch_files.length > 0 && (
+                      <div className="flex flex-col gap-space-xs font-label-sm text-label-sm">
+                        <strong>TARGET CODEBASE FILES:</strong>
+                        <ul className="list-disc list-inside font-mono text-xs bg-surface-container p-2 border border-black space-y-1">
+                          {selectedIssue.touch_files.map((f, i) => (
+                            <li key={i}>{f}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-1 font-label-sm text-label-sm">
+                      <span className="font-bold uppercase text-on-surface">AUTOMATED NEXT STEPS:</span>
+                      <div className="space-y-1.5 text-on-surface-variant">
+                        {(selectedIssue?.steps && selectedIssue.steps.length > 0
+                          ? selectedIssue.steps
+                          : [
+                              `Clone repository and checkout a new branch fix/issue-${selectedIssue?.number || "42"}`,
+                              "Locate target source files and verify existing test cases",
+                              "Implement the proposed change and run the unit test harness",
+                              "Submit pull request referencing the issue number",
+                            ]
+                        ).map((step, idx) => (
+                          <div key={idx} className="flex items-start gap-2">
+                            <span className="bg-black text-white px-1.5 text-[10px] shrink-0 font-bold">
+                              {idx + 1}
+                            </span>
+                            <span className="text-xs">{step}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-space-sm border-t-2 border-black flex gap-2">
                       <a
                         href={selectedIssue?.html_url || `https://github.com/${analysis.full_name}/issues`}
                         target="_blank"

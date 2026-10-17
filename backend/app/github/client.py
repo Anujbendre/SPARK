@@ -3,6 +3,16 @@ import httpx
 from app.core.config import settings
 
 
+class IssueList(list):
+    """List of GitHub issues that dynamically preserves total_count from Search API."""
+
+    total_count: int
+
+    def __init__(self, items: list[dict], total_count: int | None = None) -> None:
+        super().__init__(items)
+        self.total_count = total_count if total_count is not None else len(items)
+
+
 class GitHubClient:
     def __init__(self, client: httpx.AsyncClient) -> None:
         self._client = client
@@ -27,19 +37,21 @@ class GitHubClient:
         return response.json()
 
     async def get_issues(self, owner: str, repository: str) -> list[dict]:
-        # 1. Primary: Use GitHub Search API with is:issue state:open to get 100% pure issues (no PR pollution)
+        # 1. Primary: Use GitHub Search API with is:issue state:open to get pure issues and true total_count
         try:
             search_query = f"repo:{owner}/{repository} is:issue state:open"
             response = await self._client.get(
                 "https://api.github.com/search/issues",
                 headers=self._headers(),
-                params={"q": search_query, "sort": "created", "order": "desc", "per_page": 30},
+                params={"q": search_query, "sort": "created", "order": "desc", "per_page": 100},
                 follow_redirects=True,
             )
             if response.status_code == 200:
-                items = response.json().get("items", [])
-                if items:
-                    return [i for i in items if "pull_request" not in i]
+                data = response.json()
+                items = [i for i in data.get("items", []) if "pull_request" not in i]
+                total_count = data.get("total_count", len(items))
+                if items or total_count == 0:
+                    return IssueList(items, total_count=total_count)
         except Exception:
             pass
 
@@ -47,11 +59,12 @@ class GitHubClient:
         response = await self._client.get(
             f"https://api.github.com/repos/{owner}/{repository}/issues",
             headers=self._headers(),
-            params={"state": "open", "per_page": 50},
+            params={"state": "open", "per_page": 100},
             follow_redirects=True,
         )
         response.raise_for_status()
-        return [issue for issue in response.json() if "pull_request" not in issue]
+        filtered = [issue for issue in response.json() if "pull_request" not in issue]
+        return IssueList(filtered, total_count=len(filtered))
 
     async def get_tree(self, owner: str, repository: str, branch: str) -> list[dict]:
         response = await self._client.get(

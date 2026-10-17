@@ -113,6 +113,10 @@ class RepositoryAnalysisService:
             for i, s in enumerate(ai_data.get("roadmap", []))
         ]
 
+        real_open_issues = getattr(issues, "total_count", None)
+        if real_open_issues is None or real_open_issues <= 0:
+            real_open_issues = overview.get("open_issues_count", len(merged_issues))
+
         return RepositoryAnalysis(
             full_name=overview["full_name"],
             description=overview.get("description"),
@@ -120,7 +124,7 @@ class RepositoryAnalysisService:
             stars=overview.get("stargazers_count", 0),
             forks=overview.get("forks_count", 0),
             language=overview.get("language"),
-            open_issues=overview.get("open_issues_count", 0),
+            open_issues=real_open_issues,
             license_name=(overview.get("license") or {}).get("spdx_id"),
             topics=overview.get("topics", []),
             contributors=contributor_models,
