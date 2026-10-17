@@ -180,9 +180,9 @@ export default function GitDiagramViewer({
             primaryBorderColor: "#0284c7",
             primaryTextColor: "#0f172a",
             lineColor: "#64748b",
-            clusterBkg: "#ffffffcc",
-            clusterBorder: "#cbd5e1",
-            edgeLabelBackground: "#ffffff",
+            clusterBkg: "transparent",
+            clusterBorder: "#94a3b8",
+            edgeLabelBackground: "transparent",
           },
           flowchart: {
             curve: "basis",

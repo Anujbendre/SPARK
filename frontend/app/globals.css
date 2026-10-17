@@ -69,22 +69,35 @@ body {
   stroke: #64748b !important;
 }
 
+/* Edge strings / labels: remove white background completely */
+.gitdiagram-svg .edgeLabel,
+.gitdiagram-svg .edgeLabel rect,
+.gitdiagram-svg .edgeLabel span,
+.gitdiagram-svg .edgeLabel p,
+.gitdiagram-svg .label-container {
+  background-color: transparent !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  fill: transparent !important;
+}
+
 .gitdiagram-svg .edgeLabel {
-  background-color: #ffffff !important;
-  padding: 2px 7px !important;
-  border-radius: 4px !important;
-  border: 1px solid #cbd5e1 !important;
   font-family: inherit !important;
   font-size: 11px !important;
   font-weight: 600 !important;
   color: #334155 !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  padding: 0 !important;
 }
 
-.gitdiagram-svg .cluster rect {
-  fill: rgba(255, 255, 255, 0.8) !important;
-  stroke: #cbd5e1 !important;
+/* Subgraph clusters: remove white background completely */
+.gitdiagram-svg .cluster rect,
+.gitdiagram-svg rect.cluster,
+.gitdiagram-svg .subgraph rect {
+  fill: transparent !important;
+  stroke: #94a3b8 !important;
   stroke-width: 1.5px !important;
+  stroke-dasharray: 4 4 !important;
   rx: 8px !important;
 }
 
