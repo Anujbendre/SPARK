@@ -30,7 +30,7 @@ class GitHubClient:
         response = await self._client.get(
             f"https://api.github.com/repos/{owner}/{repository}/issues",
             headers=self._headers(),
-            params={"state": "open", "per_page": 8},
+            params={"state": "open", "per_page": 30},
             follow_redirects=True,
         )
         response.raise_for_status()

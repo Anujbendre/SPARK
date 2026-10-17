@@ -568,7 +568,14 @@ export default function HomePage() {
                       <span>•</span>
                       <span>{analysis.forks.toLocaleString()} FORKS</span>
                       <span>•</span>
-                      <span className="text-error font-bold">{analysis.open_issues} OPEN ISSUES</span>
+                      <span className="text-error font-bold">
+                        {analysis.issues.length} OPEN ISSUES
+                      </span>
+                      {analysis.open_issues > analysis.issues.length && (
+                        <span className="text-xs text-on-surface-variant font-medium">
+                          ({analysis.open_issues} total in repo)
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -611,7 +618,7 @@ export default function HomePage() {
                       : "bg-surface-container-lowest text-on-surface hover:bg-surface-container"
                   }`}
                 >
-                  03. Issue Recommender
+                  03. Issue Recommender ({analysis.issues.length})
                 </button>
                 <button
                   onClick={() => setActiveTab("path")}
@@ -827,7 +834,17 @@ export default function HomePage() {
 
               {/* TAB 3: ISSUE RECOMMENDER */}
               {activeTab === "issues" && (
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+                <div className="flex flex-col gap-space-md">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-black pb-2 gap-2">
+                    <span className="font-label-sm text-label-sm uppercase font-bold text-on-surface-variant">
+                      ACTIVE REPOSITORY ISSUES ({analysis.issues.length} DISPLAYED{analysis.open_issues > analysis.issues.length ? ` OF ${analysis.open_issues} TOTAL` : ""})
+                    </span>
+                    <span className="font-label-sm text-label-sm bg-black text-white px-2 py-0.5 uppercase shrink-0">
+                      AI-SCORED FOR CONTRIBUTORS
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
                   {/* Issue List */}
                   <div className="lg:col-span-7 flex flex-col gap-space-sm">
                     {analysis.issues.length === 0 ? (
@@ -958,6 +975,7 @@ export default function HomePage() {
                       </button>
                     </div>
                   </div>
+                </div>
                 </div>
               )}
 
