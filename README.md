@@ -25,11 +25,31 @@ Instead of spending hours figuring out where to start, use SPARK to build a clea
 
 <!-- TODO: Add screenshots or a short demo GIF after capturing the working application. -->
 
-<img width="1920" height="1080" alt="Screenshot (1920)" src="https://github.com/user-attachments/assets/b96364db-4b00-4c90-b5e9-79f65f3e3e7c" />
-<img width="1920" height="1080" alt="Screenshot (1921)" src="https://github.com/user-attachments/assets/c394149e-876b-4415-b3f1-8459937a295c" />
-<img width="1920" height="1080" alt="Screenshot (1922)" src="https://github.com/user-attachments/assets/f8743e75-5ca6-4b3f-beb1-e3eef800c6de" />
-<img width="1920" height="1080" alt="Screenshot (1923)" src="https://github.com/user-attachments/assets/6c260288-750a-465d-94d7-f9a3261a3080" />
-<img width="1920" height="1080" alt="Screenshot (1924)" src="https://github.com/user-attachments/assets/b5374f30-a6d4-45d5-9fde-dff3eca8e9e0" />
+## Screenshots
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/b96364db-4b00-4c90-b5e9-79f65f3e3e7c" width="49%" alt="SPARK Homepage" />
+  <img src="https://github.com/user-attachments/assets/c394149e-876b-4415-b3f1-8459937a295c" width="49%" alt="SPARK Architecture Graph" />
+</div>
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/f8743e75-5ca6-4b3f-beb1-e3eef800c6de" width="49%" alt="SPARK Contributors" />
+  <img src="https://github.com/user-attachments/assets/6c260288-750a-465d-94d7-f9a3261a3080" width="49%" alt="SPARK Contribution Roadmap" />
+</div>
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/b5374f30-a6d4-45d5-9fde-dff3eca8e9e0" width="70%" alt="SPARK Ask AI" />
+</div>
+
+## Video
+
+
+
+https://github.com/user-attachments/assets/2cb00722-5c33-4540-bb2c-d1c67592dae0
+
+
+
+
 
 
 
