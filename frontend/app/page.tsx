@@ -844,7 +844,7 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start" style={{ alignItems: "start" }}>
                   {/* Issue List */}
                   <div className="lg:col-span-7 flex flex-col gap-space-sm">
                     {analysis.issues.length === 0 ? (
@@ -901,7 +901,10 @@ export default function HomePage() {
                   </div>
 
                   {/* Issue Specification Inspector */}
-                  <div className="lg:col-span-5 border-2 border-black bg-surface-container-lowest p-space-md brutal-shadow-lg flex flex-col gap-space-sm sticky top-24 self-start h-fit">
+                  <div
+                    className="lg:col-span-5 issue-inspector-card border-2 border-black bg-surface-container-lowest p-space-md brutal-shadow-lg flex flex-col gap-space-sm sticky top-24 self-start"
+                    style={{ height: "fit-content", alignSelf: "start" }}
+                  >
                     <div className="flex items-center justify-between border-b-2 border-black pb-2">
                       <span className="font-label-sm text-label-sm bg-black text-white px-2 py-0.5 uppercase">
                         ISSUE SPECIFICATION

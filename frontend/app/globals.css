@@ -128,3 +128,12 @@ body {
   stroke-width: 2px !important;
 }
 
+/* ISSUE SPECIFICATION INSPECTOR COMPACT FIT */
+.issue-inspector-card {
+  height: fit-content !important;
+  max-height: calc(100vh - 120px) !important;
+  align-self: flex-start !important;
+  overflow-y: auto !important;
+}
+
+
