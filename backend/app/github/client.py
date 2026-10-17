@@ -27,10 +27,27 @@ class GitHubClient:
         return response.json()
 
     async def get_issues(self, owner: str, repository: str) -> list[dict]:
+        # 1. Primary: Use GitHub Search API with is:issue state:open to get 100% pure issues (no PR pollution)
+        try:
+            search_query = f"repo:{owner}/{repository} is:issue state:open"
+            response = await self._client.get(
+                "https://api.github.com/search/issues",
+                headers=self._headers(),
+                params={"q": search_query, "sort": "created", "order": "desc", "per_page": 30},
+                follow_redirects=True,
+            )
+            if response.status_code == 200:
+                items = response.json().get("items", [])
+                if items:
+                    return [i for i in items if "pull_request" not in i]
+        except Exception:
+            pass
+
+        # 2. Resilient fallback to standard repository issues endpoint
         response = await self._client.get(
             f"https://api.github.com/repos/{owner}/{repository}/issues",
             headers=self._headers(),
-            params={"state": "open", "per_page": 30},
+            params={"state": "open", "per_page": 50},
             follow_redirects=True,
         )
         response.raise_for_status()
