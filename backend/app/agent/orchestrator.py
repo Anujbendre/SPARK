@@ -1,3 +1,4 @@
+import asyncio
 import json
 import logging
 from typing import Any
@@ -26,10 +27,10 @@ class RepositoryAgent:
         if not self._client:
             return None
 
-        models_to_try = []
-        if settings.gemma_model and settings.gemma_model != "gemini-2.5-flash":
+        # Try gemini-2.5-flash first for high speed and reliability, and gemma_model as fallback/alternative
+        models_to_try = ["gemini-2.5-flash"]
+        if settings.gemma_model and settings.gemma_model not in models_to_try:
             models_to_try.append(settings.gemma_model)
-        models_to_try.append("gemini-2.5-flash")
 
         for model_name in models_to_try:
             try:
@@ -83,7 +84,7 @@ class RepositoryAgent:
             f"README Excerpt:\n{readme[:2500]}"
         )
 
-        raw_json = self._call_model(prompt_input, ANALYSIS_SYSTEM_PROMPT)
+        raw_json = await asyncio.to_thread(self._call_model, prompt_input, ANALYSIS_SYSTEM_PROMPT)
         if raw_json:
             try:
                 clean_json = raw_json
@@ -123,7 +124,7 @@ class RepositoryAgent:
             f"Context snippet: {repo_context.get('readme', '')[:2000]}"
         )
 
-        raw_json = self._call_model(prompt_input, ASK_SYSTEM_PROMPT)
+        raw_json = await asyncio.to_thread(self._call_model, prompt_input, ASK_SYSTEM_PROMPT)
         if raw_json:
             try:
                 clean_json = raw_json
