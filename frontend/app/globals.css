@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  background: #f9f9f9;
+  color: #1a1c1c;
+  font-family: Inter, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+html,
+body {
+  overscroll-behavior: none;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.brutal-shadow-sm {
+  box-shadow: 2px 2px 0 #000;
+}
+
+.brutal-shadow-md {
+  box-shadow: 4px 4px 0 #000;
+}
+
+.brutal-shadow-lg {
+  box-shadow: 8px 8px 0 #000;
+}
+
+.brutal-btn {
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.brutal-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #000;
+}
+
+.brutal-btn:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 #000;
+}
+
+/* GITDIAGRAM SVG FLOWCHART STYLES */
+.gitdiagram-svg svg {
+  max-width: none !important;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.gitdiagram-svg .edgePath path {
+  stroke: #64748b !important;
+  stroke-width: 1.5px !important;
+}
+
+.gitdiagram-svg .edgePath marker path {
+  fill: #64748b !important;
+  stroke: #64748b !important;
+}
+
+/* Edge strings / labels: remove white background completely */
+.gitdiagram-svg .edgeLabel,
+.gitdiagram-svg .edgeLabel rect,
+.gitdiagram-svg .edgeLabel span,
+.gitdiagram-svg .edgeLabel p,
+.gitdiagram-svg .label-container {
+  background-color: transparent !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  fill: transparent !important;
+}
+
+.gitdiagram-svg .edgeLabel {
+  font-family: inherit !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  color: #334155 !important;
+  padding: 0 !important;
+}
+
+/* Subgraph clusters: remove white background completely */
+.gitdiagram-svg .cluster rect,
+.gitdiagram-svg rect.cluster,
+.gitdiagram-svg .subgraph rect {
+  fill: transparent !important;
+  stroke: #94a3b8 !important;
+  stroke-width: 1.5px !important;
+  stroke-dasharray: 4 4 !important;
+  rx: 8px !important;
+}
+
+.gitdiagram-svg .cluster text {
+  font-family: inherit !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+  fill: #1e293b !important;
+}
+
+.gitdiagram-svg .node {
+  cursor: pointer;
+}
+
+.gitdiagram-svg .node rect,
+.gitdiagram-svg .node circle,
+.gitdiagram-svg .node ellipse,
+.gitdiagram-svg .node polygon {
+  rx: 6px !important;
+  transition: filter 0.15s ease, stroke-width 0.15s ease;
+}
+
+.gitdiagram-svg .node:hover rect,
+.gitdiagram-svg .node:hover circle,
+.gitdiagram-svg .node:hover ellipse,
+.gitdiagram-svg .node:hover polygon {
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.18));
+  stroke-width: 2px !important;
+}
+
